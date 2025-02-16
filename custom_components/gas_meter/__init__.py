@@ -111,13 +111,11 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Set up the integration from a config entry (UI setup)."""
     await _register_services(hass)
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
+    await hass.config_entries.async_forward_entry_setups(config_entry, ["sensor"])
     return True
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Unload the integration."""
-    # Unload the sensor platform
+    # Forward the unloading to the sensor platform
     await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
     return True
