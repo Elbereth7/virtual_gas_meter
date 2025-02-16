@@ -1,0 +1,7 @@
+{
+  "name": "Virtual Gas Meter",
+  "hide": false,
+  "domains": ["gas_meter"],
+  "country": "PL",
+  "homeassistant": "2024.12.2"
+}
