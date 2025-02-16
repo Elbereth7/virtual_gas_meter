@@ -1,4 +1,4 @@
-from homeassistant.components.template.sensor import SensorTemplate
+from homeassistant.components.template.sensor import TemplateSensor
 from homeassistant.components.history_stats.sensor import HistoryStatsSensor
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 import logging
@@ -9,23 +9,21 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the sensor platform."""
     # Create template sensors
     sensors = [
-        SensorTemplate(
-            hass,
-            value_template="{{ (states('gas_meter.latest_gas_data') | float(0) + (states('sensor.heating_interval') | float(0) * states('gas_meter.average_m3_per_min') | float(0.010692178587454502)))  | round(3) }}",
+        TemplateSensor(
+            hass=hass,
+            name="Consumed Gas",
             unique_id="2452716740004",
             unit_of_measurement="m³",
             device_class="gas",
+            template="{{ (states('gas_meter.latest_gas_data') | float(0) + (states('sensor.heating_interval') | float(0) * states('gas_meter.average_m3_per_min') | float(0.010692178587454502)) | round(3) }}",
         ),
-        SensorTemplate(
-            hass,
-            value_template="{{ states('gas_meter.latest_gas_update') }}",
+        TemplateSensor(
+            hass=hass,
+            name="Gas Meter Start Time",
             unique_id="gas_meter_latest_update",
+            template="{{ states('gas_meter.latest_gas_update') }}",
         ),
     ]
-    
-    # Set friendly names for the sensors
-    sensors[0]._attr_friendly_name = "Consumed Gas"
-    sensors[1]._attr_friendly_name = "Gas Meter Start Time"
 
     # Add the template sensors to Home Assistant
     async_add_entities(sensors, update_before_add=True)
