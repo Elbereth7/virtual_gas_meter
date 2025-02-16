@@ -17,7 +17,7 @@ The **Virtual Gas Meter** is a Home Assistant integration that estimates gas con
 ### 1. Clone the Repository
 
 ```sh
-git clone https://github.com/Elbereth7/virtual_gas_meter.git
+git clone https://github.com/Elbereth7/virtual_gas_meter
 ```
 
 ### 2. Copy Files to Home Assistant
@@ -25,7 +25,7 @@ git clone https://github.com/Elbereth7/virtual_gas_meter.git
 Copy the `gas_meter` folder into your Home Assistant `custom_components` directory:
 
 ```sh
-cp -r virtual-gas-meter/custom_components/gas_meter /config/custom_components/
+cp -r virtual_gas_meter/custom_components/gas_meter /config/custom_components/
 ```
 
 ### 3. Restart Home Assistant
