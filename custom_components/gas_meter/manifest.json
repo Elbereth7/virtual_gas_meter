@@ -1,0 +1,11 @@
+{
+    "domain": "gas_meter",
+    "name": "Virtual Gas Meter",
+    "documentation": "https://github.com/Elbereth7/virtual_gas_meter",
+    "dependencies": [],
+    "requirements": ["aiofiles"],
+    "codeowners": ["@Elbereth7"],
+    "issue_tracker": "https://github.com/Elbereth7/virtual_gas_meter/issues",
+    "iot_class": "local_polling",
+    "version": "1.0"
+}
