@@ -1,0 +1,12 @@
+trigger_gas_update:
+  description: "Trigger gas meter calculation logic."
+  fields:
+    datetime:
+      description: "The timestamp for the gas meter reading (format: YYYY-MM-DD HH:MM)."
+      example: "2025-01-12 15:51"
+    consumed_gas:
+      description: "The gas meter reading in cubic meters with a dot as a delimiter."
+      example: 4247.816
+
+read_gas_actualdata_file:
+  description: "Read gas meter file."
