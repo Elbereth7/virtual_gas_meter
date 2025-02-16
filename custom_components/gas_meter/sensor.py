@@ -1,8 +1,10 @@
 from homeassistant.components.template.sensor import SensorTemplate
-from homeassistant.helpers.entity import Entity
 from homeassistant.components.history_stats.sensor import HistoryStatsSensor
-from homeassistant.helpers.entity_registry import async_get_registry
-                                                                  
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the integration from a config entry."""
     # Create template sensors
@@ -27,7 +29,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities(sensors, update_before_add=True)
 
     # Create history stats sensor
-    history_stats_sensor = HistoryStatsSensor(
+    history_stats_sensor = await hass.async_add_executor_job(
+        HistoryStatsSensor,
         hass,
         name="Heating Interval",
         entity_id="switch.kociol_l1",
@@ -40,10 +43,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities([history_stats_sensor], update_before_add=True)
 
     # Set state_class for the consumed_gas sensor
-    registry = await async_get_registry(hass)
+    registry = await async_get_entity_registry(hass)
     entity_id = "sensor.consumed_gas"
     if entity_id in registry.entities:
         registry.async_update_entity(
             entity_id,
             state_class="total",
         )
+    else:
+        _LOGGER.warning(f"Entity {entity_id} not found in the registry.")
