@@ -1,13 +1,11 @@
 from homeassistant import config_entries
 
-# Import your integration's constants
-from .const import DOMAIN
+DOMAIN = "gas_meter"
 
-class YourIntegrationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow."""
+class GasMeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for the Virtual Gas Meter integration."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
