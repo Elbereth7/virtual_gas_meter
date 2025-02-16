@@ -1,8 +1,9 @@
 {
     "domain": "gas_meter",
     "name": "Virtual Gas Meter",
+    "config_flow": true,
     "documentation": "https://github.com/Elbereth7/virtual_gas_meter",
-    "dependencies": [],
+    "dependencies": ["template", "history_stats"],
     "requirements": ["aiofiles"],
     "codeowners": ["@Elbereth7"],
     "issue_tracker": "https://github.com/Elbereth7/virtual_gas_meter/issues",
