@@ -16,7 +16,7 @@ async def save_gas_actualdata(gas_consume, hass):
     async with aiofiles.open(filename, "wb") as file:
         await file.write(pickle.dumps(gas_consume))
 
-# Function to load gas actual data from a file when opening the app
+# Function to load gas actual data from a file
 async def load_gas_actualdata(hass):
     filename = get_gas_actualdata_path(hass)
     try:
