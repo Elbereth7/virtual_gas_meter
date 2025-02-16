@@ -1,16 +1,16 @@
-"""Vitual gas meter"""
 import logging
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.components.recorder.history import get_significant_states
 from homeassistant.util import dt as dt_util
 from homeassistant.helpers.discovery import async_load_platform
+from homeassistant.config_entries import ConfigEntry
 import custom_components.gas_meter.file_handler as fh
+
 DOMAIN = "gas_meter"
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the virtual gas meter integration."""
-    _LOGGER.info("Loading Virtual Gas Meter integration...")
+async def _register_services(hass: HomeAssistant):
+    """Register services shared between legacy and UI setups."""
     async def handle_trigger_service(call: ServiceCall):
         """Handle the service call to update gas meter data."""
         try:
@@ -93,13 +93,31 @@ async def async_setup(hass: HomeAssistant, config: dict):
             _LOGGER.error("Error in read_gas_actualdata_file: %s", str(e))
             raise
             
-    # Register the service in Home Assistant
+    # Register the services
     hass.services.async_register(
         DOMAIN, "trigger_gas_update", handle_trigger_service
     )
     hass.services.async_register(
         DOMAIN, "read_gas_actualdata_file", read_gas_actualdata_file
     )
-    # Load the sensor platform
+
+async def async_setup(hass: HomeAssistant, config: dict):
+    """Set up the virtual gas meter integration (legacy YAML setup)."""
+    _LOGGER.info("Loading Virtual Gas Meter integration...")
+    await _register_services(hass)
     await async_load_platform(hass, "sensor", DOMAIN, {}, config)
+    return True
+
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Set up the integration from a config entry (UI setup)."""
+    await _register_services(hass)
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
+    )
+    return True
+
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Unload the integration."""
+    # Unload the sensor platform
+    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
     return True
