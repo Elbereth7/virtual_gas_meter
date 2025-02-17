@@ -1,8 +1,10 @@
 import logging
+import inspect
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.components.recorder.history import get_significant_states
 from homeassistant.util import dt as dt_util
 from homeassistant.helpers.discovery import async_load_platform
+from homeassistant.components.history_stats.coordinator import HistoryStatsUpdateCoordinator, HistoryStats
 from homeassistant.config_entries import ConfigEntry
 import custom_components.gas_meter.file_handler as fh
 
@@ -92,6 +94,46 @@ async def _register_services(hass: HomeAssistant):
         except Exception as e:
             _LOGGER.error("Error in read_gas_actualdata_file: %s", str(e))
             raise
+
+    def inspect_class(cls):
+        # Print the class name
+        _LOGGER.info(f"Class: {cls.__name__}")
+        
+        # Print the docstring for the class
+        _LOGGER.info(f"Docstring: {cls.__doc__}")
+        
+        # Print the __init__ method signature and docstring
+        if hasattr(cls, '__init__'):
+            _LOGGER.info("\n__init__ method:")
+            _LOGGER.info(f"Signature: {cls.__init__.__annotations__}")
+            _LOGGER.info(f"Docstring: {cls.__init__.__doc__}")
+        
+        # Print other methods and their docstrings
+        _LOGGER.info("\nMethods:")
+        for name, method in cls.__dict__.items():
+            if callable(method):
+                _LOGGER.info(f"{name}:")
+                _LOGGER.info(f"  Docstring: {method.__doc__}")
+        
+        # Print attributes
+        _LOGGER.info("\nAttributes:")
+        for name, value in cls.__dict__.items():
+            if not callable(value):
+                _LOGGER.info(f"{name}: {value}")
+
+    async def debug_history_stats_sensor(hass: HomeAssistant):
+        """Debug and log valid parameters for HistoryStatsUpdateCoordinator."""
+        try:
+            constructor_signature = inspect.signature(HistoryStatsUpdateCoordinator)
+
+            _LOGGER.info("Valid Parameters for HistoryStatsUpdateCoordinator:")
+            for param_name, param in constructor_signature.parameters.items():
+                _LOGGER.info(f"- {param_name}: {param.annotation} (Default: {param.default})")
+            
+            inspect_class(HistoryStatsUpdateCoordinator)
+
+        except ImportError as e:
+            _LOGGER.error(f"Error importing HistoryStatsUpdateCoordinator: {e}")
             
     # Register the services
     hass.services.async_register(
@@ -99,6 +141,9 @@ async def _register_services(hass: HomeAssistant):
     )
     hass.services.async_register(
         DOMAIN, "read_gas_actualdata_file", read_gas_actualdata_file
+    )
+    hass.services.async_register(
+        DOMAIN, "debug_history_stats_sensor", debug_history_stats_sensor
     )
 
 async def async_setup(hass: HomeAssistant, config: dict):
