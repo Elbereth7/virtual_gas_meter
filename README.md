@@ -2,126 +2,122 @@
 
 ## Overview
 
-The **Virtual Gas Meter** is a Home Assistant integration that estimates gas consumption (in cubic meters) based on the operating time of a boiler. It calculates gas usage using Home Assistant's historical data and user-provided manual readings.
-
+The **Virtual Gas Meter** is a Home Assistant integration designed to estimate gas consumption using an average gas usage rate. It provides a virtual sensor that mimics a real-life gas meter by calculating gas consumption based on boiler runtime. Additionally, users can manually update the sensor with real-life gas meter readings to improve accuracy over time.
 ## Features
 
 - **Virtual Gas Meter Calculation**: Estimates gas consumption using time-based calculations.
 - **Sensor Integration**: Creates Home Assistant sensors to track gas usage and historical updates.
 - **Manual Data Entry**: Allows users to input real gas meter readings periodically.
-- **Historical Data Analysis**: Uses Home Assistant's history to determine boiler runtime.
+- **Historical Data Analysis**: Uses Home Assistant's history stats to calculate active heating intervals.
 - **Logging & Persistence**: Stores and retrieves gas meter data using a file-based system.
+- **Provides configurable options** to customize gas calculation parameters.
+- **Implements Home Assistant services** to trigger manual gas updates and read stored data.
+- **Supports Home Assistant's UI-based configuration flow**.
 
 ## Installation
 
-### 1. Clone the Repository
-
-```sh
-git clone https://github.com/Elbereth7/virtual_gas_meter
-```
-
-### 2. Copy Files to Home Assistant
-
-Copy the `gas_meter` folder into your Home Assistant `custom_components` directory:
-
-```sh
-cp -r virtual_gas_meter/custom_components/gas_meter /config/custom_components/
-```
-
-### 3. Restart Home Assistant
-
-Restart Home Assistant for the integration to load.
+### Install via HACS (Recommended)
+1. **Ensure HACS is installed** in your Home Assistant instance.
+2. **Add the Custom Repository:**
+   - Open HACS in Home Assistant.
+   - Navigate to `Integrations` and click the three-dot menu.
+   - Select `Custom Repositories`.
+   - Add the repository URL: `https://github.com/Elbereth7/virtual_gas_meter`.
+   - Choose `Integration` as the category and click `Add`.
+3. **Install the Integration:**
+   - Search for `Virtual Gas Meter` in HACS and install it.
+   - Restart Home Assistant to apply changes.
+   
+### Manual Installation
+1. Download the repository as a ZIP file and extract it.
+2. Copy the `custom_components/gas_meter` folder into your Home Assistant `config/custom_components/` directory.
+3. Restart Home Assistant.
 
 ## Configuration
 
-Add the following to your `configuration.yaml`:
+### Adding the Integration
+1. Navigate to **Settings** > **Devices & Services**.
+2. Click **"Add Integration"** and search for `Virtual Gas Meter`.
+3. Select your boiler switch (`switch.xxx`).
+4. Optionally, enter an average gas consumption per hour (m³) and the latest gas meter state.
+5. Click **"Submit"**.
+   
+### Services
 
-```yaml
-sensor:
-  - platform: template
-    sensors:
-      consumed_gas:
-        friendly_name: "Consumed Gas"
-        value_template: "{{ (states('gas_meter.latest_gas_data') | float(0) + (states('sensor.heating_interval') | float(0) * states('gas_meter.average_m3_per_min') | float(0.010692178587454502)))  | round(3) }}"
-        unique_id: '2452716740004'
-        unit_of_measurement: m³
-        device_class: gas
-      gas_meter_latest_update:
-        friendly_name: "Gas Meter Start Time"
-        value_template: "{{ states('gas_meter.latest_gas_update') }}"
-        unique_id: 'gas_meter_latest_update'
+#### `trigger_gas_update`
+This service allows users to manually enter a real-life gas meter reading. This is crucial to keep the virtual gas meter accurate over time.
+
+- **Why use this?**
+  - The virtual gas meter **estimates** gas consumption using the average rate.
+  - By entering real readings, the system **adjusts** the average gas consumption for better accuracy.
+  - If no real readings are provided, the virtual gas meter relies on the initial average entered during installation (or a default value if none was provided).
   
-  - platform: history_stats
-    name: Heating interval
-    entity_id: switch.kociol_l1
-    state: 'on'
-    type: time
-    start: "{{ states('sensor.gas_meter_latest_update') }}"
-    end: "{{ now() }}"
-    unique_id: "heating_interval"
-```
+- **Fields:**
+  - `datetime`: Timestamp for the gas reading (format: `YYYY-MM-DD HH:MM`).
+  - `consumed_gas`: Gas meter reading in cubic meters (`m³`).
 
-## Services
+- **Service Call Example (via Developer Tools > Services):**
 
-This integration provides two custom Home Assistant services:
+  ```yaml
+  service: gas_meter.trigger_gas_update
+  data:
+    datetime: "2025-02-12 15:51"
+    consumed_gas: 4447.816
+  ```
 
-### `trigger_gas_update`
+#### `read_gas_actualdata_file`
+This service reads the stored gas meter data file.
 
-- **Description**: Enter actual gas meter readings.
-- **Fields**:
-  - `datetime`: The timestamp of the reading (format: `YYYY-MM-DD HH:MM`).
-  - `consumed_gas`: The measured gas consumption in cubic meters.
-- **Example Call**:
-
-```yaml
-service: gas_meter.trigger_gas_update
-data:
-  datetime: "2025-01-12 15:51"
-  consumed_gas: 4247.816
-```
-
-### `read_gas_actualdata_file`
-
-- **Description**: Read historical gas meter data from logs.
-- **Example Call**:
+- **Service Call Example (via Developer Tools > Services):**
 
 ```yaml
 service: gas_meter.read_gas_actualdata_file
 ```
-
 ## Code Overview
 
 The integration consists of the following files:
 
 ### `__init__.py`
+- Handles the initialization and setup of the integration, including data persistence and service registration.
 
-Handles the initialization and setup of the integration, including data persistence and service registration.
+### `sensor.py`
+- Implements:
+  - `CustomTemplateSensor` for dynamic gas calculations.
+  - `GasDataSensor` to track stored gas usage data.
+  - `CustomHistoryStatsSensor` for boiler operation tracking.
+
+### `config_flow.py`
+- Manages Home Assistant’s UI-based configuration flow.
 
 ### `datetime_handler.py`
-
-Handles date-time parsing and conversion for the integration.
+- Handles date-time parsing and conversion.
 
 ### `file_handler.py`
-
-Manages file operations for saving and retrieving gas meter data.
+- Manages asynchronous file operations for gas consumption data.
 
 ### `gas_consume.py`
-
-Defines the `GasConsume` class for managing gas meter records.
+- Stores gas consumption records using a custom list-based class.
 
 ### `manifest.json`
-
-Defines the metadata for the integration, including dependencies and versioning.
+- Defines integration metadata, dependencies, and requirements.
 
 ### `services.yaml`
+- Documents the available Home Assistant services for interacting with the integration.
 
-Describes the available Home Assistant services for the integration.
+### `translations/en.json`
+- Provides user-friendly descriptions for the configuration flow.
+
 
 ## Usage
 
-1. **Start tracking gas consumption**: The integration automatically calculates virtual gas meter readings based on boiler runtime.
-2. **Manually update the gas meter**: Use the `trigger_gas_update` service to enter real gas readings.
-3. **Check historical data**: Use `read_gas_actualdata_file` to retrieve past records from logs.
+1. **Monitor gas consumption** in Home Assistant's dashboard.
+2. **Trigger gas updates manually** using `trigger_gas_update` if needed.
+3. **Read stored data** with `read_gas_actualdata_file`.
+4. **Customize calculations** by adjusting the boiler entity and average consumption settings.
+
+## Support & Issues
+
+For any issues or feature requests, please visit the [GitHub Issue Tracker](https://github.com/Elbereth7/virtual_gas_meter/issues).
 
 ## Contributing
 
@@ -131,3 +127,6 @@ Contributions are welcome! Feel free to submit pull requests or report issues in
 
 This project is licensed under the MIT License. See `LICENSE` for details.
 
+## Conclusion
+
+By installing and periodically updating the Virtual Gas Meter, users can maintain an accurate and useful gas consumption tracking system within Home Assistant. Keeping the gas meter updated with real-life readings ensures the highest accuracy in long-term tracking. 🚀
