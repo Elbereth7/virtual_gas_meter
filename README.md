@@ -125,7 +125,7 @@ Contributions are welcome! Feel free to submit pull requests or report issues in
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License. See [LICENSE](https://github.com/Elbereth7/virtual_gas_meter/blob/main/LICENSE) for details.
 
 ## Conclusion
 
