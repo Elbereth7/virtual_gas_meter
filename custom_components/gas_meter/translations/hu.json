@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Virtuális Gázóra Beállítása",
+                "description": "Konfigurálja a Virtuális Gázóra integrációt.",
+                "data": {
+                    "boiler_entity": "Válassza ki a kazán kapcsolóját (kötelező)",
+                    "boiler_average": "(Opcionális) Adja meg az átlagos gázfogyasztást óránként (m³)",
+                    "latest_gas_data": "(Opcionális) Adja meg a gázóra kezdeti állapotát (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nem találhatók kapcsolók a Home Assistant rendszerében."
+        }
+    }
+}
