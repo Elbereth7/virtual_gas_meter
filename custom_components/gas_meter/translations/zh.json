@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "虚拟燃气表设置",
+                "description": "配置虚拟燃气表集成。",
+                "data": {
+                    "boiler_entity": "选择锅炉开关实体（必填）",
+                    "boiler_average": "(可选) 输入每小时平均燃气消耗量 (m³)",
+                    "latest_gas_data": "(可选) 输入燃气表初始状态 (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "在您的 Home Assistant 实例中未找到任何开关实体。"
+        }
+    }
+}
