@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Nastavenie virtuálneho plynomera",
+                "description": "Konfigurujte integráciu virtuálneho plynomera.",
+                "data": {
+                    "boiler_entity": "Vyberte entitu prepínača kotla (povinné)",
+                    "boiler_average": "(Voliteľné) Zadajte priemernú spotrebu plynu za hodinu (m³)",
+                    "latest_gas_data": "(Voliteľné) Zadajte počiatočný stav plynomera (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "V inštancii vášho Home Assistanta neboli nájdené žiadne entity prepínača."
+        }
+    }
+}
