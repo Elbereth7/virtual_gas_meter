@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Innstilling av virtuell gassmåler",
+                "description": "Konfigurer integrasjonen av den virtuelle gassmåleren.",
+                "data": {
+                    "boiler_entity": "Velg enhet for kjelens bryter (obligatorisk)",
+                    "boiler_average": "(Valgfritt) Skriv inn gjennomsnittlig gassforbruk per time (m³)",
+                    "latest_gas_data": "(Valgfritt) Skriv inn startverdien for gassmåleren (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Det ble ikke funnet noen bryter-enheter i din Home Assistant-instans."
+        }
+    }
+}
