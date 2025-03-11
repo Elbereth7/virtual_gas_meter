@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Nastavení Virtuálního Plynoměru",
+                "description": "Nakonfigurujte integraci Virtuálního Plynoměru.",
+                "data": {
+                    "boiler_entity": "Vyberte spínač kotle (povinné)",
+                    "boiler_average": "(Volitelné) Zadejte průměrnou spotřebu plynu za hodinu (m³)",
+                    "latest_gas_data": "(Volitelné) Zadejte počáteční stav plynoměru (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Ve vaší instanci Home Assistant nebyly nalezeny žádné spínače."
+        }
+    }
+}
