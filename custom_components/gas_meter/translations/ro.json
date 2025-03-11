@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configurare contor de gaz virtual",
+                "description": "Configurează integrarea contorului de gaz virtual.",
+                "data": {
+                    "boiler_entity": "Selectează entitatea comutatorului cazanului (obligatoriu)",
+                    "boiler_average": "(Opțional) Introduceți consumul mediu de gaz pe oră (m³)",
+                    "latest_gas_data": "(Opțional) Introduceți starea inițială a contorului de gaz (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nu au fost găsite entități de comutator în instanța Home Assistant."
+        }
+    }
+}
