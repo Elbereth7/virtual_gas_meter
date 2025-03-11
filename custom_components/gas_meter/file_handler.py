@@ -1,7 +1,7 @@
 from pathlib import Path
-from custom_components.gas_meter.datetime_handler import string_to_datetime
+from .datetime_handler import string_to_datetime
 import pickle
-from custom_components.gas_meter.gas_consume import GasConsume
+from .gas_consume import GasConsume
 import aiofiles
 
 def get_gas_actualdata_path(hass):
