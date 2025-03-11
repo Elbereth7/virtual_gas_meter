@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Virtuaalse gaasiarvesti seadistamine",
+                "description": "Konfigureeri virtuaalse gaasiarvesti integratsioon.",
+                "data": {
+                    "boiler_entity": "Valige katla lüliti üksus (kohustuslik)",
+                    "boiler_average": "(Valikuline) Sisestage keskmine gaasi tarbimine tunnis (m³)",
+                    "latest_gas_data": "(Valikuline) Sisestage algne gaasiarvesti seisund (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Teie Home Assistanti instantsis ei leitud ühtegi lüliti üksust."
+        }
+    }
+}
