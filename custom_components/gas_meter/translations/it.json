@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configurazione del Contatore del Gas Virtuale",
+                "description": "Configura l'integrazione del Contatore del Gas Virtuale.",
+                "data": {
+                    "boiler_entity": "Seleziona l'entità dell'interruttore della caldaia (obbligatorio)",
+                    "boiler_average": "(Opzionale) Inserisci il consumo medio di gas per ora (m³)",
+                    "latest_gas_data": "(Opzionale) Inserisci lo stato iniziale del contatore del gas (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nessuna entità interruttore trovata nella tua istanza di Home Assistant."
+        }
+    }
+}
