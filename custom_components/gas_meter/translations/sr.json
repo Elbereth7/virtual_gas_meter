@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": 
+                "title": "Podešavanje virtuelnog gasnog brojila",
+                "description": "Konfigurišite integraciju virtuelnog gasnog brojila.",
+                "data": {
+                    "boiler_entity": "Izaberite entitet za prekidač bojlera (obavezno)",
+                    "boiler_average": "(Opcionalno) Unesite prosečnu potrošnju gasa po satu (m³)",
+                    "latest_gas_data": "(Opcionalno) Unesite početno stanje gasnog brojila (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nisu pronađeni entiteti prekidača u vašoj Home Assistant instanci."
+        }
+    }
+}
