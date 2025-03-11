@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configuración del Medidor de Gas Virtual",
+                "description": "Configura la integración del Medidor de Gas Virtual.",
+                "data": {
+                    "boiler_entity": "Selecciona la entidad del interruptor de la caldera (obligatorio)",
+                    "boiler_average": "(Opcional) Ingresa el consumo medio de gas por hora (m³)",
+                    "latest_gas_data": "(Opcional) Ingresa el estado inicial del medidor de gas (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "No se encontraron entidades de interruptor en tu instancia de Home Assistant."
+        }
+    }
+}
