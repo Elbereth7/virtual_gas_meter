@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Sanal Gaz Sayacı Kurulumu",
+                "description": "Sanal Gaz Sayacı entegrasyonunu yapılandırın.",
+                "data": {
+                    "boiler_entity": "Kazan anahtarı birimini seçin (zorunlu)",
+                    "boiler_average": "(İsteğe bağlı) Saatlik ortalama gaz tüketimini girin (m³)",
+                    "latest_gas_data": "(İsteğe bağlı) Gaz sayacının başlangıç durumunu girin (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Home Assistant örneğinizde anahtar birimi bulunamadı."
+        }
+    }
+}
