@@ -1,131 +1,160 @@
 import logging
+import asyncio
+
 from datetime import datetime, timedelta
-from homeassistant.core import HomeAssistant
+from homeassistant.const import STATE_UNKNOWN
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.core import HomeAssistant, callback, ServiceCall
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.history_stats.sensor import HistoryStatsSensor
 from homeassistant.components.history_stats.coordinator import HistoryStatsUpdateCoordinator, HistoryStats
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
-from homeassistant.util.dt import parse_datetime, now
+from homeassistant.util.dt import now
 from homeassistant.helpers.template import Template
+from .const import DOMAIN, DEFAULT_BOILER_AV_M, DEFAULT_LATEST_GAS_DATA, DEFAULT_BOILER_ENTITY
+import custom_components.gas_meter.file_handler as fh
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class CustomTemplateSensor(SensorEntity):
-    """Custom Template Sensor for Home Assistant."""
-
-    def __init__(self, hass, friendly_name, unique_id, state_template, unit_of_measurement=None, device_class=None, icon=None):
-        """Initialize the sensor."""
+    def __init__(self, hass, friendly_name, unique_id, state_template, unit_of_measurement=None, device_class=None, icon=None, state_class=None):
         self.hass = hass
-        self._attr_name = friendly_name  # Set the friendly name
-        self._attr_unique_id = unique_id  # Set the unique ID
+        self._attr_name = friendly_name
+        self._attr_unique_id = unique_id
         self._state_template = state_template
-        self._attr_unit_of_measurement = unit_of_measurement
+        self._attr_unit_of_measurement = unit_of_measurement if unit_of_measurement else "m³"
         self._attr_device_class = device_class
         self._attr_icon = icon
+        self._attr_state_class = state_class
         self._state = None
 
     @property
-    def state(self):
-        """Return the sensor's state."""
+    def native_value(self):
         return self._state
 
     async def async_update(self):
-        """Update the sensor by rendering the template."""
         try:
-            # Render the template asynchronously
-            self._state = await self.hass.async_add_executor_job(
-                self._render_template
-            )
+            self._state = await self._async_render_template()
         except Exception as e:
             _LOGGER.error("Template rendering failed for %s: %s", self._attr_unique_id, str(e))
             self._state = "error"
 
-    def _render_template(self):
-        """Render the template synchronously."""
+    async def _async_render_template(self):
         template = Template(self._state_template, self.hass)
         return template.async_render()
+
+class GasDataSensor(SensorEntity):
+    _attr_name = "Gas Consumption Data"
+    _attr_unique_id = "gas_consumption_data"
+
+    def __init__(self, hass: HomeAssistant):
+        self.hass = hass
+        self._state = STATE_UNKNOWN
+        self._gas_data = []
+
+    async def async_update(self):
+        try:
+            self._gas_data = await fh.load_gas_actualdata(self.hass)
+            if self._gas_data:
+                self._state = str(self._gas_data[-1])
+            else:
+                self._state = STATE_UNKNOWN
+        except Exception as e:
+            _LOGGER.error("Error updating gas sensor: %s", str(e))
+            self._state = STATE_UNKNOWN
+
+    @property
+    def native_value(self):
+        return self._state
+
+    @property
+    def extra_state_attributes(self):
+        if self._gas_data:
+            return {"records": self._gas_data.to_list()}
+        return {}
+
+class CustomHistoryStatsSensor(HistoryStatsSensor):
+    def __init__(self, entity_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.entity_id = entity_id
+
+    async def async_update(self):
+        await self.coordinator.async_request_refresh()
+
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities: AddEntitiesCallback):
     """Set up the sensor platform and add the entities."""
-    
-    # Fetch the last update time from the gas meter sensor
-    gas_meter_update = hass.states.get("sensor.gas_meter_latest_update")
-
-    if not gas_meter_update or gas_meter_update.state in [None, "unknown", "unavailable"]:
-        _LOGGER.warning("Sensor 'sensor.gas_meter_latest_update' is unavailable. Using fallback start time.")
-        start_time = Template("{{ now()}}", hass)  # Template object
-    else:
-        try:
-            parsed_time = parse_datetime(gas_meter_update.state)
-            if parsed_time is None:
-                raise ValueError("Invalid datetime format")
-            start_time = Template("{{ states('sensor.gas_meter_latest_update') }}", hass)  # Template object
-        except ValueError:
-            _LOGGER.error("Invalid datetime format for 'sensor.gas_meter_latest_update': %s", gas_meter_update.state)
-            return
-
-    # Create HistoryStats instance for tracking heating interval
-    history_stats = HistoryStats(
-        hass=hass,
-        entity_id="switch.kociol_l1",
-        entity_states="on",
-        start=start_time,  # Template object
-        end=Template("{{ now() }}", hass),  # Template object
-        duration=None
-    )
-
-    # Initialize HistoryStatsUpdateCoordinator
-    coordinator = HistoryStatsUpdateCoordinator(
-        hass=hass,
-        history_stats=history_stats,
-        config_entry=config_entry,
-        name="Heating Interval"
-    )
-
-    # Create HistoryStatsSensor
-    history_stats_sensor = HistoryStatsSensor(
-        hass=hass,
-        name="Heating Interval",
-        source_entity_id="switch.kociol_l1",
-        sensor_type="time",
-        unique_id="heating_interval",
-        coordinator=coordinator
-    )
-
-    # Add sensors to Home Assistant
-    async_add_entities([history_stats_sensor], update_before_add=True)
-
-    _LOGGER.info("Heating Interval sensor added successfully.")
-
-    # Define custom template sensors
     sensors = [
         CustomTemplateSensor(
             hass=hass,
             friendly_name="Consumed gas",
-            unique_id="consumed_gas",  # Unique ID for the entity
-            state_template="{{ (states('gas_meter.latest_gas_data') | float(0) + (states('sensor.heating_interval') | float(0) * states('gas_meter.average_m3_per_min') | float(0.010692178587454502)) | round(3)) }}",
+            unique_id="consumed_gas",
+            state_template=f"{{{{ (states('{DOMAIN}.latest_gas_data') | float({DEFAULT_LATEST_GAS_DATA}) + (states('sensor.heating_interval_2') | float(0) * states('{DOMAIN}.average_m3_per_min') | float({DEFAULT_BOILER_AV_M})) | round(3)) }}}}",
             unit_of_measurement="m³",
             device_class="gas",
             icon="mdi:gas-cylinder",
+            state_class="total",
         ),
         CustomTemplateSensor(
             hass=hass,
             friendly_name="Gas meter latest update",
-            unique_id="gas_meter_latest_update",  # Unique ID for the entity
-            state_template="{{ states('gas_meter.latest_gas_update') }}",
+            unique_id="gas_meter_latest_update",
+            state_template=f"{{{{ states('{DOMAIN}.latest_gas_update') if states('{DOMAIN}.latest_gas_update') not in ['unknown', 'unavailable', None] }}}}",
             icon="mdi:clock",
         ),
     ]
+
+    async_add_entities([GasDataSensor(hass)], True)
     async_add_entities(sensors, update_before_add=True)
 
-    # Update state_class for 'sensor.consumed_gas' if it exists
-    registry = async_get_entity_registry(hass)
-    entity_id = "sensor.consumed_gas"
-    
-    if entity_id in registry.entities:
-        registry.async_update_entity(entity_id, state_class="total")
-    else:
-        _LOGGER.warning("Entity %s not found in the registry, skipping state_class update.", entity_id)
+    async def create_history_stats_sensor(hass: HomeAssistant, config_entry):
+        start_template = Template("{{ states('sensor.gas_meter_latest_update') }}", hass)
+        end_template = Template("{{ now() }}", hass)
+
+        boiler_entity = hass.states.get(f"{DOMAIN}.boiler_entity")
+        boiler_entity_id = boiler_entity.state if boiler_entity and boiler_entity.state else DEFAULT_BOILER_ENTITY
+
+        history_stats = HistoryStats(
+            hass=hass,
+            entity_id=boiler_entity_id,
+            entity_states=["on"],
+            start=start_template,
+            end=end_template,
+            duration=None,
+        )
+
+        coordinator = HistoryStatsUpdateCoordinator(
+            hass=hass,
+            history_stats=history_stats,
+            config_entry=config_entry,
+            name="Heating Interval"
+        )
+
+        await coordinator.async_refresh()
+
+        history_stats_sensor = CustomHistoryStatsSensor(
+            entity_id = "sensor.heating_interval",
+            hass=hass,
+            name="Heating Interval",
+            source_entity_id=boiler_entity_id,
+            sensor_type="time",
+            unique_id="heating_interval",
+            coordinator=coordinator
+        )
+
+        @callback
+        def _handle_coordinator_update():
+            """Handle updated data from the coordinator."""
+            if history_stats_sensor.hass is None:
+                _LOGGER.warning("Skipping update: hass is not available for %s", history_stats_sensor.name)
+                return
+
+            history_stats_sensor._attr_state = coordinator.data
+            history_stats_sensor.async_write_ha_state()
+
+        coordinator.async_add_listener(_handle_coordinator_update)
+        async_add_entities([history_stats_sensor], update_before_add=True)
+        _LOGGER.info("Heating Interval sensor added successfully.")
+
+    asyncio.create_task(create_history_stats_sensor(hass, config_entry))
