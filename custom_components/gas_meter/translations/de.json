@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Einrichtung des Virtuellen Gaszählers",
+                "description": "Konfigurieren Sie die Integration des Virtuellen Gaszählers.",
+                "data": {
+                    "boiler_entity": "Wählen Sie die Kessel-Schalterentität aus (obligatorisch)",
+                    "boiler_average": "(Optional) Geben Sie den durchschnittlichen Gasverbrauch pro Stunde ein (m³)",
+                    "latest_gas_data": "(Optional) Geben Sie den anfänglichen Gaszählerstand ein (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Keine Schalterentitäten in Ihrer Home Assistant-Instanz gefunden."
+        }
+    }
+}
