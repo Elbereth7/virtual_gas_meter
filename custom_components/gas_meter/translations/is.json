@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Uppsetning á sýndar gasmæli",
+                "description": "Stilla sýndar gasmæli samþættingu.",
+                "data": {
+                    "boiler_entity": "Veldu fyrirbæri heitavatnsslökkvara (skylda)",
+                    "boiler_average": "(Valfrjálst) Sláðu inn meðalgasspotrefni á klukkustund (m³)",
+                    "latest_gas_data": "(Valfrjálst) Sláðu inn upphaflegt ástand gasmælir (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Engar slökkvunar-einingar fundust í Home Assistant reikningnum þínum."
+        }
+    }
+}
