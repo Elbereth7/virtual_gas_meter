@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Virtual Gas Meter Setup",
+                "description": "Configure the Virtual Gas Meter integration.",
+                "data": {
+                    "boiler_entity": "Select the boiler switch entity (mandatory)",
+                    "boiler_average": "(Optional) Enter average gas consumption per hour (m³)",
+                    "latest_gas_data": "(Optional) Enter initial gas meter state (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "No switch entities were found in your Home Assistant instance."
+        }
+    }
+}
