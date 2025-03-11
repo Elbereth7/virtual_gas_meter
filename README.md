@@ -107,6 +107,263 @@ The integration consists of the following files:
 ### `translations/en.json`
 - Provides user-friendly descriptions for the configuration flow.
 
+## Proposed Frontend Configuration (Lovelace UI)
+To integrate the Virtual Gas Meter into your Lovelace dashboard, follow these steps:
+
+### Step 1: Modify `configuration.yaml`
+Add the following lines:
+```yaml
+automation: !include automations.yaml
+
+input_datetime:
+  gas_update_datetime:
+    name: Gas Update Datetime
+    has_date: true
+    has_time: true
+    icon: mdi:calendar-clock
+
+input_number:
+  consumed_gas:
+    name: Consumed Gas (m³)
+    min: 0
+    max: 10000
+    step: 0.001
+    mode: box
+    icon: mdi:meter-gas
+
+input_button:
+  trigger_gas_update:
+    name: Trigger Gas Update
+    icon: mdi:fire
+  read_gas_actualdata_file:
+    name: Read Gas Actual Data File
+    icon: mdi:book-open-page-variant-outline
+
+input_text:
+  gas_update_status:
+    name: Status of Gas Meter Update
+    icon: mdi:check
+```
+
+### Step 2: Modify `automations.yaml`
+```yaml
+- alias: Enter Gas Meter Correction
+  description: ''
+  mode: single
+  triggers:
+  - trigger: state
+    entity_id: input_button.trigger_gas_update
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: '{{ states(''input_datetime.gas_update_datetime'') > states(''sensor.gas_meter_latest_update'')
+            }}'
+        - condition: numeric_state
+          entity_id: input_number.consumed_gas
+          above: 0
+      sequence:
+      - sequence:
+        - action: gas_meter.trigger_gas_update
+          data:
+            datetime: '{{ states(''input_datetime.gas_update_datetime'') }}'
+            consumed_gas: '{{ states(''input_number.consumed_gas'') | float }}'
+        - parallel:
+          - action: input_datetime.set_datetime
+            data:
+              datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+            target:
+              entity_id: input_datetime.gas_update_datetime
+          - action: input_number.set_value
+            data:
+              entity_id: input_number.consumed_gas
+              value: 0
+        - parallel:
+          - action: notify.notify
+            data:
+              message: ✅ Gas data updated successfully! (notify)
+              title: Gas Meter Update
+          - action: system_log.write
+            data:
+              message: ✅ Gas data updated successfully! (system log)
+              level: info
+          - action: input_text.set_value
+            data:
+              value: ✅ Gas data updated successfully!
+            target:
+              entity_id: input_text.gas_update_status
+    - conditions:
+      - condition: numeric_state
+        entity_id: input_number.consumed_gas
+        below: 1
+      sequence:
+      - sequence:
+        - parallel:
+          - action: notify.notify
+            data:
+              message: ❌ Gas update failed! Enter the consumed gas value (notify)
+          - action: system_log.write
+            data:
+              message: ❌ Gas update failed! Enter the consumed gas value (system log)
+              level: info
+          - action: input_text.set_value
+            data:
+              value: ❌ Enter consumed gas value
+            target:
+              entity_id: input_text.gas_update_status
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+        - action: input_text.set_value
+          data:
+            value: ⏳ Waiting for an update... (input_text)
+          target:
+            entity_id: input_text.gas_update_status
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''input_datetime.gas_update_datetime'') <= states(''sensor.gas_meter_latest_update'') }}'
+      - condition: template
+        value_template: '{{ states(''sensor.gas_consumption_data'') != ''unknown'' }}'
+      sequence:
+      - sequence:
+        - parallel:
+          - action: notify.notify
+            data:
+              message: ❌ Failed to update Gas Meter data. The entered date and time
+                is earlier than the most recent recorded entry
+          - action: system_log.write
+            data:
+              message: ❌ Failed to update Gas Meter data. The entered date and time
+                is earlier than the most recent recorded entry
+              level: info
+          - action: input_text.set_value
+            data:
+              value: ❌ The entered date and time is earlier than the most recent recorded
+                entry
+            target:
+              entity_id: input_text.gas_update_status
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+        - action: input_text.set_value
+          data:
+            value: ⏳ Waiting for an update... (input_text)
+          target:
+            entity_id: input_text.gas_update_status
+    default:
+    - sequence:
+      - parallel:
+        - action: notify.notify
+          data:
+            message: ❌ Gas update failed! Check the logs (notify)
+        - action: input_text.set_value
+          data:
+            value: ❌ Gas update failed! Check the logs (input_text)
+          target:
+            entity_id: input_text.gas_update_status
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: input_text.set_value
+        data:
+          value: ⏳ Waiting for an update... (input_text)
+        target:
+          entity_id: input_text.gas_update_status
+
+- alias: Read Gas Actual Data File
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_button.read_gas_actualdata_file
+  conditions: []
+  actions:
+  - action: gas_meter.read_gas_actualdata_file
+  - action: timer.start
+    target:
+      entity_id: timer.gas_data_visibility_timer
+  mode: single
+```
+
+### Step 3: Add Dashboard Cards
+Go to **Overview → Edit Dashboard → Create section → Add card** and search for **Vertical stack card**. Then click **Show Code Editor** and replace the code with the following and **Save**:
+(Repeat these actions to create each of three sections below)
+
+#### Virtual Gas Meter Data Section
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - entity: sensor.consumed_gas
+      - entity: sensor.gas_meter_latest_update
+      - entity: sensor.heating_interval_2
+title: Virtual Gas Meter
+```
+
+#### Enter Actual Gas Meter Data Section
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - entity: input_datetime.gas_update_datetime
+      - entity: input_number.consumed_gas
+  - type: horizontal-stack
+    cards:
+      - show_name: true
+        show_icon: true
+        type: button
+        entity: input_button.trigger_gas_update
+        show_state: false
+        tap_action:
+          action: toggle
+      - type: markdown
+        content: |
+          Gas Update Status
+
+          {{ states('input_text.gas_update_status') }}
+title: Enter Actual Gas Meter Data (Correction)
+```
+
+#### Read Gas Meter Data File Section
+```yaml
+type: vertical-stack
+cards:
+  - show_name: true
+    show_icon: true
+    type: button
+    entity: input_button.read_gas_actualdata_file
+    show_state: false
+    tap_action:
+      action: toggle
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: timer.gas_data_visibility_timer
+        state: active
+    card:
+      type: markdown
+      title: Gas Meter Readings
+      content: >
+        {% set readings = state_attr('sensor.gas_consumption_data', 'records')
+        %}  {% if readings %}
+          {% for record in readings | reverse %}
+          - {{ record }}  
+          {% endfor %}
+        {% else %}
+          No gas meter data available.
+        {% endif %}
+```
 
 ## Usage
 
