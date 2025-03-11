@@ -24,8 +24,8 @@ The **Virtual Gas Meter** is a Home Assistant integration designed to estimate g
    - Select `Custom Repositories`.
    - Add the repository URL: `https://github.com/Elbereth7/virtual_gas_meter`.
    - Choose `Integration` as the category and click `Add`.
-3. **Install the Integration:**
-   - Search for `Virtual Gas Meter` in HACS and install it.
+3. **Download the Integration:**
+   - Search for `Virtual Gas Meter` in HACS and download it.
    - Restart Home Assistant to apply changes.
    
 ### Manual Installation
