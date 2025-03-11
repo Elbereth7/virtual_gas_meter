@@ -147,9 +147,9 @@ input_text:
 
 ### Step 2: Modify `automations.yaml`
 ```yaml
-- alias: Enter Gas Meter Correction
+- id: 407f4da583f94f27be69d9f40b995915
+  alias: Enter Gas Meter Correction
   description: ''
-  mode: single
   triggers:
   - trigger: state
     entity_id: input_button.trigger_gas_update
@@ -159,9 +159,14 @@ input_text:
     - conditions:
       - condition: and
         conditions:
-        - condition: template
-          value_template: '{{ states(''input_datetime.gas_update_datetime'') > states(''sensor.gas_meter_latest_update'')
-            }}'
+        - condition: or
+          conditions:
+          - condition: template
+            value_template: '{{ states(''input_datetime.gas_update_datetime'') > states(''sensor.gas_meter_latest_update'')
+              }}'
+          - condition: template
+            value_template: '{{ states(''sensor.gas_consumption_data'') == ''unknown''
+              }}'
         - condition: numeric_state
           entity_id: input_number.consumed_gas
           above: 0
@@ -195,6 +200,16 @@ input_text:
               value: ✅ Gas data updated successfully!
             target:
               entity_id: input_text.gas_update_status
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+        - action: input_text.set_value
+          data:
+            value: ⏳ Waiting for an update... (input_text)
+          target:
+            entity_id: input_text.gas_update_status
     - conditions:
       - condition: numeric_state
         entity_id: input_number.consumed_gas
@@ -226,9 +241,11 @@ input_text:
             entity_id: input_text.gas_update_status
     - conditions:
       - condition: template
-        value_template: '{{ states(''input_datetime.gas_update_datetime'') <= states(''sensor.gas_meter_latest_update'') }}'
+        value_template: '{{ states(''input_datetime.gas_update_datetime'') <= states(''sensor.gas_meter_latest_update'')
+          }}'
       - condition: template
-        value_template: '{{ states(''sensor.gas_consumption_data'') != ''unknown'' }}'
+        value_template: '{{ states(''sensor.gas_consumption_data'') != ''unknown''
+          }}'
       sequence:
       - sequence:
         - parallel:
@@ -268,18 +285,20 @@ input_text:
             value: ❌ Gas update failed! Check the logs (input_text)
           target:
             entity_id: input_text.gas_update_status
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 10
-          milliseconds: 0
-      - action: input_text.set_value
-        data:
-          value: ⏳ Waiting for an update... (input_text)
-        target:
-          entity_id: input_text.gas_update_status
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 10
+        milliseconds: 0
+    - action: input_text.set_value
+      data:
+        value: ⏳ Waiting for an update... (input_text)
+      target:
+        entity_id: input_text.gas_update_status
+  mode: single
 
-- alias: Read Gas Actual Data File
+- id: '1741039685422'
+  alias: Read Gas Actual Data File
   description: ''
   triggers:
   - trigger: state
