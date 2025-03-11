@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configuration du Compteur de Gaz Virtuel",
+                "description": "Configurez l'intégration du Compteur de Gaz Virtuel.",
+                "data": {
+                    "boiler_entity": "Sélectionnez l'entité du chauffe-eau (obligatoire)",
+                    "boiler_average": "(Optionnel) Entrez la consommation moyenne de gaz par heure (m³)",
+                    "latest_gas_data": "(Optionnel) Entrez l'état initial du compteur de gaz (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Aucun interrupteur n'a été trouvé dans votre instance Home Assistant."
+        }
+    }
+}
