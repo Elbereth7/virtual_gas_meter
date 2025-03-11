@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Nastavitev virtualnega plinskega števca",
+                "description": "Konfigurirajte integracijo virtualnega plinskega števca.",
+                "data": {
+                    "boiler_entity": "Izberite enoto stikala za kotel (obvezno)",
+                    "boiler_average": "(Neobvezno) Vnesite povprečno porabo plina na uro (m³)",
+                    "latest_gas_data": "(Neobvezno) Vnesite začetno stanje plinskega števca (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "V vaši instanci Home Assistant niso bile najdene nobene enote stikala."
+        }
+    }
+}
