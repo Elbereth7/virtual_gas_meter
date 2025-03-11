@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Postavke virtualnog plinskog brojila",
+                "description": "Konfigurirajte integraciju virtualnog plinskog brojila.",
+                "data": {
+                    "boiler_entity": "Odaberite entitet prekidača kotla (obavezno)",
+                    "boiler_average": "(Opcionalno) Unesite prosječnu potrošnju plina po satu (m³)",
+                    "latest_gas_data": "(Opcionalno) Unesite početno stanje plinskog brojila (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nisu pronađeni entiteti prekidača u vašoj Home Assistant instanci."
+        }
+    }
+}
