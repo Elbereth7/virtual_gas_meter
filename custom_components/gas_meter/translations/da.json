@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Opsætning af virtuel gasmåler",
+                "description": "Konfigurer integrationen af den virtuelle gasmåler.",
+                "data": {
+                    "boiler_entity": "Vælg enhed for kedelafbryder (obligatorisk)",
+                    "boiler_average": "(Valgfrit) Indtast gennemsnitligt gasforbrug per time (m³)",
+                    "latest_gas_data": "(Valgfrit) Indtast initialt gasmålerstand (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Der blev ikke fundet nogen afbryderenheder i din Home Assistant-instans."
+        }
+    }
+}
