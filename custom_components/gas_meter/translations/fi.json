@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Virtuaalisen kaasumittarin asetukset",
+                "description": "Määritä virtuaalisen kaasumittarin integrointi.",
+                "data": {
+                    "boiler_entity": "Valitse kattilan kytkinyksikkö (pakollinen)",
+                    "boiler_average": "(Valinnainen) Syötä keskimääräinen kaasunkulutus tunnissa (m³)",
+                    "latest_gas_data": "(Valinnainen) Syötä kaasumittarin alkuperäinen tila (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Home Assistant -instanssistasi ei löytynyt kytkinyksiköitä."
+        }
+    }
+}
