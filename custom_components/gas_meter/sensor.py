@@ -56,7 +56,11 @@ class GasDataSensor(SensorEntity):
         try:
             self._gas_data = await fh.load_gas_actualdata(self.hass)
             if self._gas_data:
-                self._state = str(self._gas_data[-1])
+                # Format the last record (most recent)
+                latest_record = self._gas_data[-1]
+                formatted_datetime = latest_record["datetime"].strftime('%Y-%m-%d %H:%M:%S')
+                formatted_gas = f"{latest_record['consumed_gas']:.2f} m³"
+                self._state = f"Last record: {formatted_datetime}, consumed gas: {formatted_gas}"
             else:
                 self._state = STATE_UNKNOWN
         except Exception as e:
@@ -70,7 +74,20 @@ class GasDataSensor(SensorEntity):
     @property
     def extra_state_attributes(self):
         if self._gas_data:
-            return {"records": self._gas_data.to_list()}
+            # Format all records for more user-friendly display on dashboard
+            formatted_records = []
+            for record in self._gas_data:
+                formatted_datetime = record["datetime"].strftime('%Y-%m-%d %H:%M:%S')
+                formatted_gas = f"{record['consumed_gas']:.3f} m³"
+                formatted_cumulative = f"{record.get('consumed_gas_cumulated', 0):.3f} m³"
+                formatted_record = {
+                    "datetime": formatted_datetime,
+                    "consumed_gas": formatted_gas,
+                    "consumed_gas_cumulated": formatted_cumulative,
+                }
+                formatted_records.append(formatted_record)
+
+            return {"records": formatted_records}
         return {}
 
 class CustomHistoryStatsSensor(HistoryStatsSensor):
