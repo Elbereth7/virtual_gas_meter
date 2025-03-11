@@ -145,7 +145,16 @@ input_text:
     icon: mdi:check
 ```
 
-### Step 2: Modify `automations.yaml`
+### Step 3: Create a timer
+1. Navigate to **Settings** > **Helpers**.
+2. Click **"Create helper"** and fill in the data:
+   - Name: Gas Data Visibility Timer
+   - Duration: 0:01:00
+   - Entity ID: timer.gas_data_visibility_timer
+   - Enabled: true
+   - Visible: true
+
+### Step 4: Modify `automations.yaml`
 ```yaml
 - id: 407f4da583f94f27be69d9f40b995915
   alias: Enter Gas Meter Correction
@@ -313,7 +322,9 @@ input_text:
   mode: single
 ```
 
-### Step 3: Add Dashboard Cards
+
+
+### Step 5: Add Dashboard Cards
 Go to **Overview → Edit Dashboard → Create section → Add card** and search for **Vertical stack card**. Then click **Show Code Editor** and replace the code with the following and **Save**:
 (Repeat these actions to create each of three sections below)
 
@@ -328,6 +339,8 @@ cards:
       - entity: sensor.heating_interval_2
 title: Virtual Gas Meter
 ```
+![image](https://github.com/user-attachments/assets/1d177664-c171-4cc7-b27e-d9a2f98c0352)
+
 
 #### Enter Actual Gas Meter Data Section
 ```yaml
@@ -353,6 +366,8 @@ cards:
           {{ states('input_text.gas_update_status') }}
 title: Enter Actual Gas Meter Data (Correction)
 ```
+![image](https://github.com/user-attachments/assets/1447997f-60ad-4561-bfb4-626ef0397c85)
+
 
 #### Read Gas Meter Data File Section
 ```yaml
@@ -375,14 +390,17 @@ cards:
       title: Gas Meter Readings
       content: >
         {% set readings = state_attr('sensor.gas_consumption_data', 'records')
-        %}  {% if readings %}
+        %} {% if readings %}
           {% for record in readings | reverse %}
-          - {{ record }}  
+          - Gas meter state on {{ record.datetime }}: the actual gas consumption was {{ record.consumed_gas }}  
           {% endfor %}
         {% else %}
           No gas meter data available.
         {% endif %}
+      entity: sensor.gas_consumption_data
 ```
+![image](https://github.com/user-attachments/assets/ae8d8c9a-6d3f-4cc3-8b52-708602a864e8)
+
 
 ## Usage
 
