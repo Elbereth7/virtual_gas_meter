@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Instellen van virtuele gasmeter",
+                "description": "Configureer de integratie van de virtuele gasmeter.",
+                "data": {
+                    "boiler_entity": "Selecteer de ketel schakelaar eenheid (verplicht)",
+                    "boiler_average": "(Optioneel) Voer het gemiddelde gasverbruik per uur in (m³)",
+                    "latest_gas_data": "(Optioneel) Voer de beginstand van de gasmeter in (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Er zijn geen schakelaar eenheden gevonden in je Home Assistant instantie."
+        }
+    }
+}
