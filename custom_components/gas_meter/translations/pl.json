@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Konfiguracja Wirtualnego Licznika Gazu",
+                "description": "Skonfiguruj integrację Wirtualnego Licznika Gazu.",
+                "data": {
+                    "boiler_entity": "Wybierz przełącznik kotła (wymagane)",
+                    "boiler_average": "(Opcjonalnie) Wprowadź średnie zużycie gazu na godzinę (m³)",
+                    "latest_gas_data": "(Opcjonalnie) Wprowadź początkowy stan licznika gazu (m³)"
+                }
+            }
+        },
+        "error": {
+            "no_switches_found": "Nie znaleziono żadnych przełączników w Twojej instancji Home Assistant."
+        }
+    }
+}
